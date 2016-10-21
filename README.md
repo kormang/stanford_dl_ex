@@ -1,3 +1,5 @@
+Didn't really have much time for this. I can't guarantee that these solutions are correct, but they seems to. I really did not put alot of effort into this.
+
 stanford_dl_ex
 ==============
 
