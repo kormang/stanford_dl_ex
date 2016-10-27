@@ -37,15 +37,17 @@ m = length(labels); % training set size
 mom = 0.5;
 momIncrease = 20;
 velocity = zeros(size(theta));
+fprintf('epochs=%d, alpha=%g, minibatch=%d, momentum=%g, momIncrease=%g, samples=%d, ipe=%d\n',...
+ epochs, alpha, minibatch, mom, momIncrease, m, length(1:minibatch:(m-minibatch+1)));
 
 %%======================================================================
 %% SGD loop
 it = 0;
 for e = 1:epochs
-    
+
     % randomly permute indices of data for quick minibatch sampling
     rp = randperm(m);
-    
+
     for s=1:minibatch:(m-minibatch+1)
         it = it + 1;
 
@@ -57,17 +59,18 @@ for e = 1:epochs
         % get next randomly selected minibatch
         mb_data = data(:,:,rp(s:s+minibatch-1));
         mb_labels = labels(rp(s:s+minibatch-1));
-
         % evaluate the objective function on the next minibatch
         [cost grad] = funObj(theta,mb_data,mb_labels);
-        
+
         % Instructions: Add in the weighted velocity vector to the
         % gradient evaluated above scaled by the learning rate.
         % Then update the current weights theta according to the
         % sgd update rule
-        
+
         %%% YOUR CODE HERE %%%
-        
+        velocity = mom * velocity + alpha * grad;
+        theta = theta - velocity;
+
         fprintf('Epoch %d: Cost on iteration %d is %f\n',e,it,cost);
     end;
 

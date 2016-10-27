@@ -2,10 +2,10 @@
 
 %  Instructions
 %  ------------
-% 
+%
 %  This file contains code that helps you get started in building a single.
 %  layer convolutional nerual network. In this exercise, you will only
-%  need to modify cnnCost.m and cnnminFuncSGD.m. You will not need to 
+%  need to modify cnnCost.m and cnnminFuncSGD.m. You will not need to
 %  modify this file.
 
 %%======================================================================
@@ -28,7 +28,6 @@ labels(labels==0) = 10; % Remap 0 to 10
 
 % Initialize Parameters
 theta = cnnInitParams(imageDim,filterDim,numFilters,poolDim,numClasses);
-
 %%======================================================================
 %% STEP 1: Implement convNet Objective
 %  Implement the function cnnCost.m.
@@ -50,27 +49,27 @@ if DEBUG
     db_labels = labels(1:10);
     db_theta = cnnInitParams(imageDim,db_filterDim,db_numFilters,...
                 db_poolDim,numClasses);
-    
+
     [cost grad] = cnnCost(db_theta,db_images,db_labels,numClasses,...
                                 db_filterDim,db_numFilters,db_poolDim);
-    
+
 
     % Check gradients
     numGrad = computeNumericalGradient( @(x) cnnCost(x,db_images,...
                                 db_labels,numClasses,db_filterDim,...
                                 db_numFilters,db_poolDim), db_theta);
- 
+
     % Use this to visually compare the gradients side by side
     disp([numGrad grad]);
-    
+
     diff = norm(numGrad-grad)/norm(numGrad+grad);
-    % Should be small. In our implementation, these values are usually 
+    % Should be small. In our implementation, these values are usually
     % less than 1e-9.
-    disp(diff); 
- 
+    disp(diff);
+
     assert(diff < 1e-9,...
         'Difference too large. Check your gradient computation again');
-    
+
 end;
 
 %%======================================================================
@@ -79,7 +78,7 @@ end;
 
 options.epochs = 3;
 options.minibatch = 256;
-options.alpha = 1e-1;
+options.alpha = 9e-4;
 options.momentum = .95;
 
 opttheta = minFuncSGD(@(x,y,z) cnnCost(x,y,z,numClasses,filterDim,...

@@ -31,5 +31,18 @@ pooledFeatures = zeros(convolvedDim / poolDim, ...
 
 %%% YOUR CODE HERE %%%
 
+poolingConvMat = ones(poolDim, poolDim);
+
+for imageNum = 1:numImages
+  for filterNum = 1:numFilters
+    filteredImage = convolvedFeatures(:, :, filterNum, imageNum);
+    summed = conv2(filteredImage, poolingConvMat, 'valid');
+    subsampled = summed(1:poolDim:end, 1:poolDim:end);
+    averaged = subsampled ./ (poolDim * poolDim);
+    pooledImage = averaged;
+    pooledFeatures(:, :, filterNum, imageNum) = pooledImage;
+  end
+end
+
 end
 
