@@ -5,12 +5,12 @@ addpath(genpath('../common/')) % path to minfunc
 %% These parameters should give you sane results. We recommend experimenting
 % with these values after you have a working solution.
 global params;
-params.m=10000; % num patches
+params.m=200000; % num patches
 params.patchWidth=9; % width of a patch
 params.n=params.patchWidth^2; % dimensionality of input to RICA
 params.lambda = 0.0005; % sparsity cost
-params.numFeatures = 50; % number of filter banks to learn
-params.epsilon = 1e-2; % epsilon to use in square-sqrt nonlinearity
+params.numFeatures = 32; % number of filter banks to learn
+params.epsilon = 1e-4; % epsilon to use in square-sqrt nonlinearity
 
 % Load MNIST data set
 data = loadMNISTImages('../common/train-images-idx3-ubyte');
@@ -33,7 +33,7 @@ x = bsxfunwrap(@rdivide,patches,m);
 %% Run the optimization
 options.Method = 'lbfgs';
 options.MaxFunEvals = Inf;
-options.MaxIter = 500;
+options.MaxIter = 1000;
 %options.display = 'off';
 options.outputFcn = @showBases;
 
