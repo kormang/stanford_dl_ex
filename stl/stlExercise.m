@@ -103,7 +103,7 @@ x = bsxfun(@rdivide, patches, m);
 display('optimizing RICA...');
 
 % RICA optimization:
-load_rica_theta_file = true;
+load_rica_theta_file = false;
 if load_rica_theta_file
    load('opttheta.mat');
    %opttheta = randTheta;

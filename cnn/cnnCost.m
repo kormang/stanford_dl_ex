@@ -113,7 +113,7 @@ probs = zeros(numClasses,numImages);
 
 %%% YOUR CODE HERE %%%
 
-z = Wd * activationsPooled + bd;
+z = bsxfun(@plus, Wd * activationsPooled, bd);
 
 a = [exp(z)];
 

@@ -22,12 +22,12 @@ z = [];
 a = data;
 
 for i = 1:numHidden
-  z = stack{i}.W * a + stack{i}.b;
+  z = bsxfun(@plus, stack{i}.W * a, stack{i}.b);
   a = f_act(z);
   hAct{i} = a;
 end
 
-z = stack{numHidden + 1}.W * a + stack{numHidden + 1}.b;
+z = bsxfun(@plus, stack{numHidden + 1}.W * a, stack{numHidden + 1}.b);
 etX = [exp(z)];
 etX_colsum = sum(etX);
 Ps = bsxfun(@rdivide, etX, etX_colsum);
