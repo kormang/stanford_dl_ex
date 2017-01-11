@@ -12,6 +12,7 @@
 %  STEP 0: Here we provide the relevant parameters values that will
 %  allow your RICA to get good filters; you do not need to 
 %  change the parameters below.
+close all
 addpath(genpath('..'))
 imgSize = 28;
 global params;
@@ -19,7 +20,7 @@ params.patchWidth=9;           % width of a patch
 params.n=params.patchWidth^2;   % dimensionality of input to RICA
 params.lambda = 0.0005;   % sparsity cost
 params.numFeatures = 32; % number of filter banks to learn
-params.epsilon = 1e-2;   
+params.epsilon = 1e-2;
 
 %% ======================================================================
 %  STEP 1: Load data from the MNIST database
@@ -80,12 +81,37 @@ options.Method = 'lbfgs';
 options.MaxFunEvals = Inf;
 options.MaxIter = 1000;
 % You'll need to replace this line with RICA training code
-opttheta = randTheta;
+%opttheta = randTheta;
 
 %  Find opttheta by running the RICA on all the training patches.
 %  You will need to whitened the patches with the zca2 function 
 %  then call minFunc with the softICACost function as seen in the RICA exercise.
 %%% YOUR CODE HERE %%%
+
+% prepare for RICA:
+display('preparing for RICA...');
+[patches, U, S, V] = zca2(patches);
+m = sqrt(sum(patches .^ 2) + 1e-8);
+x = bsxfun(@rdivide, patches, m);
+
+% display('checking RICA gradients');
+% numgrad = computeNumericalGradient(@(theta) softICACost(theta, x, params), opttheta);
+% [~, grad] = softICACost(opttheta, x, params);
+% graderror = mean(abs(numgrad - grad));
+% display(['RICA grad errors is ', num2str(graderror)]);
+
+display('optimizing RICA...');
+
+% RICA optimization:
+load_rica_theta_file = true;
+if load_rica_theta_file
+   load('opttheta.mat');
+   %opttheta = randTheta;
+else
+  [opttheta, cost, exitflag] = minFunc(@(theta) softICACost(theta, x, params), randTheta, options);
+  save('opttheta.mat', 'opttheta');
+end
+%opttheta = rand(size(randTheta)) * (sqrt(6) / sqrt(size(randTheta, 1) + size(randTheta, 2)));
 
 % reshape visualize weights
 W = reshape(opttheta, params.numFeatures, params.n);
@@ -97,7 +123,14 @@ display_network(W');
 % pre-multiply the weights with whitening matrix, equivalent to whitening
 % each image patch before applying convolution. V should be the same V
 % returned by the zca2 when you whiten the patches.
+
+% It seams that this line, as well as finding W using RICA do not
+% have significant effect on accuracy. Using random W gives approximatelly
+% same results. And using all 10 classes gives worst results then CNN. So
+% either I'm doing something wrong, or all this does not make sense.
 W = W*V;
+figure
+display_network(W');
 %  reshape RICA weights to be convolutional weights.
 W = reshape(W, params.numFeatures, params.patchWidth, params.patchWidth);
 W = permute(W, [2,3,1]);
@@ -121,8 +154,8 @@ testFeatures = reshape(testAct, featureSize, size(testData, 2));
 
 numClasses  = 5; % doing 5-class digit recognition
 % initialize softmax weights randomly
-randTheta2 = randn(numClasses, featureSize)*0.01;  % 1/sqrt(params.n);
-randTheta2 = randTheta2 ./ repmat(sqrt(sum(randTheta2.^2,2)), 1, size(randTheta2,2)); 
+randTheta2 = randn(numClasses - 1, featureSize)*0.01;  % 1/sqrt(params.n);
+randTheta2 = randTheta2 ./ repmat(sqrt(sum(randTheta2.^2,2)), 1, size(randTheta2,2));
 randTheta2 = randTheta2';
 randTheta2 = randTheta2(:);
 
@@ -135,12 +168,22 @@ options.MaxIter = 300;
 % optimize
 %%% YOUR CODE HERE %%%
 
+% display('checking SOFTMAX gradients');
+% numgrad = computeNumericalGradient(@(theta) softmax_regression_vec(theta, trainFeatures, trainLabels), randTheta2);
+% [~, grad] = softmax_regression_vec(randTheta2, trainFeatures, trainLabels);
+% graderror = mean(abs(numgrad - grad));
+% display(['SOFTMAX grad errors is ', num2str(graderror)]);
 
+[opttheta, cost, exitflag] = minFunc(@(theta) softmax_regression_vec(theta, trainFeatures, trainLabels), randTheta2, options);
+opttheta = reshape(opttheta, [featureSize, numClasses - 1]);
+opttheta = [opttheta, zeros(featureSize, 1)];
 %%======================================================================
 %% STEP 5: Testing 
 % Compute Predictions on tran and test sets using softmaxPredict
 % and softmaxModel
 %%% YOUR CODE HERE %%%
+[~, train_pred] = max(opttheta' * trainFeatures, [], 1);
+[~, pred] = max(opttheta' * testFeatures, [], 1);
 % Classification Score
 fprintf('Train Accuracy: %f%%\n', 100*mean(train_pred(:) == trainLabels(:)));
 fprintf('Test Accuracy: %f%%\n', 100*mean(pred(:) == testLabels(:)));

@@ -1,4 +1,4 @@
-Didn't really have much time for this. I can't guarantee that these solutions are correct, but they seems to. I really did not put alot of effort into this.
+Didn't really have much time for this. I can't guarantee that these solutions are correct, but they seem to be. I really have not put alot of effort into this, to be honest. Maybe some things could be better, but I tried with my own implementation.
 
 stanford_dl_ex
 ==============
