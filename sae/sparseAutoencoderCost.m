@@ -20,11 +20,11 @@ b2 = theta(2*hiddenSize*visibleSize+hiddenSize+1:end);
 
 % Cost and gradient variables (your code needs to compute these values). 
 % Here, we initialize them to zeros. 
-cost = 0;
-W1grad = zeros(size(W1)); 
-W2grad = zeros(size(W2));
-b1grad = zeros(size(b1)); 
-b2grad = zeros(size(b2));
+% cost = 0;
+% W1grad = zeros(size(W1));
+% W2grad = zeros(size(W2));
+% b1grad = zeros(size(b1));
+% b2grad = zeros(size(b2));
 
 %% ---------- YOUR CODE HERE --------------------------------------
 %  Instructions: Compute the cost/optimization objective J_sparse(W,b) for the Sparse Autoencoder,
@@ -46,36 +46,44 @@ m = size(data, 2);
 ro = sparsityParam;
 
 % forward propagation:
-z1 = bsxfun(@plus, W1 * data, b1);
-a1 = sigmoid(z1);
+%z1 = bsxfun(@plus, W1 * data, b1);
+a1 = sigmoid(bsxfun(@plus, W1 * data, b1));
 ro_hats = 1/m * sum(a1, 2);
-sparsityCosts = ro .* log(ro ./ ro_hats) + (1 - ro) .* log((1 - ro) ./ (1 - ro_hats));
+one_m_ro_hats = 1 - ro_hats;
+sparsityCosts = ro .* log(ro ./ ro_hats) + (1 - ro) .* log((1 - ro) ./ (one_m_ro_hats));
 sparsityCost = beta * sum(sparsityCosts);
 
-z2 = bsxfun(@plus, W2 * a1, b2);
-a2 = sigmoid(z2);
+%z2 = bsxfun(@plus, W2 * a1, b2);
+a2 = sigmoid(bsxfun(@plus, W2 * a1, b2));
 
 errors = a2 - data;
-errorsSquared = errors .* errors;
-errorCostPerExample = sum(errorsSquared);
-errorCost = 1/(2*m) * sum(errorCostPerExample);
+%errorCostPerExample = sum(errors .* errors);
+errorCost = 1/(2*m) * sum(sum(errors .* errors));
 
 regularizationCost = lambda / 2 * (sum(sum(W1 .* W1)) + sum(sum(W2 .* W2)));
 
 cost = errorCost + regularizationCost + sparsityCost;
+
 
 % back propagation:
 delta = errors .* ((1 - a2) .* a2);
 W2grad = 1/m * (delta * a1');
 b2grad = 1/m * sum(delta, 2);
 
-delta = (W2' * delta) .* ((1 - a1) .* a1);
+a1deriv = ((1 - a1) .* a1);
+delta = (W2' * delta) .* a1deriv;
 W1grad = 1/m * (delta * data');
 b1grad = 1/m * sum(delta, 2);
 
-sparsityGradBase = (-ro./ro_hats + (1 - ro)./(1 - ro_hats));
-W1sparsityGrad = beta/m * bsxfun(@times, (a1 .* (1 - a1)), sparsityGradBase) * data';
-b1sparsityGrad = beta/m * sum(bsxfun(@times, (a1 .* (1 - a1)), sparsityGradBase), 2);
+sparsityGradBase = (-ro./ro_hats + (1 - ro)./(one_m_ro_hats));
+W1sparsityGrad = beta/m * bsxfun(@times, a1deriv, sparsityGradBase) * data';
+b1sparsityGrad = beta/m * sum(bsxfun(@times, a1deriv, sparsityGradBase), 2);
+
+% release temporaries:
+errors = [];
+delta = [];
+a1deriv = [];
+sparsityGradBase = [];
 
 W2regularizationGrad = lambda * W2;
 W1regularizationGrad = lambda * W1;
