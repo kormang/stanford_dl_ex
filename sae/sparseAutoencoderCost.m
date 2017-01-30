@@ -48,9 +48,10 @@ ro = sparsityParam;
 % forward propagation:
 %z1 = bsxfun(@plus, W1 * data, b1);
 a1 = sigmoid(bsxfun(@plus, W1 * data, b1));
-ro_hats = 1/m * sum(a1, 2);
-one_m_ro_hats = 1 - ro_hats;
-sparsityCosts = ro .* log(ro ./ ro_hats) + (1 - ro) .* log((1 - ro) ./ (one_m_ro_hats));
+ro_hats = mean(a1, 2);
+g1 = ro ./ ro_hats;
+g2 = (1 - ro) ./ (1 - ro_hats);
+sparsityCosts = ro .* log(g1) + (1 - ro) .* log(g2);
 sparsityCost = beta * sum(sparsityCosts);
 
 %z2 = bsxfun(@plus, W2 * a1, b2);
@@ -75,15 +76,15 @@ delta = (W2' * delta) .* a1deriv;
 W1grad = 1/m * (delta * data');
 b1grad = 1/m * sum(delta, 2);
 
-sparsityGradBase = (-ro./ro_hats + (1 - ro)./(one_m_ro_hats));
-W1sparsityGrad = beta/m * bsxfun(@times, a1deriv, sparsityGradBase) * data';
-b1sparsityGrad = beta/m * sum(bsxfun(@times, a1deriv, sparsityGradBase), 2);
+delta_sparse = bsxfun(@times, a1deriv, 1/m * (g2 - g1));
+W1sparsityGrad = beta * (delta_sparse * data');
+b1sparsityGrad = beta * sum(delta_sparse, 2);
 
 % release temporaries:
 errors = [];
 delta = [];
 a1deriv = [];
-sparsityGradBase = [];
+delta_sparse = [];
 
 W2regularizationGrad = lambda * W2;
 W1regularizationGrad = lambda * W1;
