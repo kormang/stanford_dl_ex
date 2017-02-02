@@ -11,3 +11,6 @@ If you have suggestions, questions, or bug reports, please submit contact:
 
 Andrew Maas ( amaas AT cs dot stanford.edu)
 Sameep Tandon (sameep AT stanford dot edu)
+
+==============
+There are extra exercises adopted from here: http://deeplearning.stanford.edu/wiki/index.php/UFLDL_Tutorial
