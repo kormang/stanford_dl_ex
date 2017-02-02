@@ -47,7 +47,7 @@ covar = xRot * xRot' / size(xRot, 2);
 
 % Visualise the covariance matrix. You should see a line across the
 % diagonal against a blue background.
-figure('name','Visualisation of covariance matrix');
+figure('name','Visualisation of covariance matrix (of rotated x)');
 imagesc(covar);
 
 %%================================================================
@@ -62,13 +62,14 @@ sumlambdas = sum(lambdas);
 k = 0;
 sumklambdas = 0;
 
-for l = lambdas
+for l = lambdas'
   k = k + 1;
   sumklambdas = sumklambdas + l;
   if sumklambdas / sumlambdas >= 0.99
     break;
   end
 end
+
 
 %%================================================================
 %% Step 3: Implement PCA with dimension reduction
@@ -97,8 +98,6 @@ xHat = Ureduced * xTilde;
 
 figure('name',['PCA processed images ',sprintf('(%d / %d dimensions)', k, size(x, 1)),'']);
 display_network(xHat(:,randsel));
-figure('name','Raw images');
-display_network(x(:,randsel));
 
 %%================================================================
 %% Step 4a: Implement PCA with whitening and regularisation
@@ -130,7 +129,7 @@ covar = xPCAWhite * xPCAWhite' / size(xPCAWhite, 2);
 
 % Visualise the covariance matrix. You should see a red line across the
 % diagonal against a blue background.
-figure('name','Visualisation of covariance matrix');
+figure('name','Visualisation of covariance matrix (of PCA whitened x');
 imagesc(covar);
 
 %%================================================================
@@ -147,7 +146,5 @@ xZCAWhite = U * xPCAWhite;
 % You should observe that the whitened images have enhanced edges.
 figure('name','ZCA whitened images');
 display_network(xZCAWhite(:,randsel));
-figure('name','Raw images');
-display_network(x(:,randsel));
 display('done');
 pause
